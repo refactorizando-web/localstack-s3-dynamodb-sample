@@ -1,0 +1,76 @@
+= Mocking AWS Services with Localstack in Spring Boot
+{localdatetime}
+:toc:
+:doctype: book
+:docinfo:
+
+This project aim to be a simple example about the use of Localstack to simulate AWS in Spring Boot.
+
+If you want more information about this example you can take a look in:
+https://refactorizando.com/mock-aws-localstack-spring-boot
+
+== Introduction
+
+LocalStack provides an easy-to-use test/mocking framework for developing Cloud applications. It provides the same functionality
+that real AWS cloud environment can give us.
+
+In this example we are going to develop an application that use two AWS services S3 and DynamoDB  in a Spring Boot application.
+
+== How does it work?
+
+First of all we are going to run a docker compose with two AWS services: S3 and DynamoDB.
+
+        version: '3.9'
+        services:
+          localstack:
+          container_name: "${LOCALSTACK_DOCKER_NAME-localstack_main}"
+          image: localstack/localstack
+            ports:
+              - "4566-4599:4566-4599"
+              - "${PORT_WEB_UI-8080}:${PORT_WEB_UI-8080}"
+            environment:
+              - SERVICES=s3,dynamodb
+              - DEBUG=1
+              - DATA_DIR=/tmp/localstack/data
+              - DOCKER_HOST=unix:///var/run/docker.sock
+        volumes:
+          - /var/run/docker.sock:/var/run/docker.sock
+          - localstack_data:/tmp/localstack/data
+        networks:
+          - localstack
+        volumes:
+          localstack_data:
+        networks:
+          localstack: {}
+
+
+To run it:
+
+     docker-compose up -d
+
+After that we can run our Spring Boot application:
+
+   mvn spring-boot:run
+
+And after that we need to create our table on DynamoDB with the next command, take in mind that we need to run the json
+that you can find in the root (car_table.json)
+
+   aws dynamodb create-table --cli-input-json file://car_table.json --endpoint-url=http://localhost:4569
+
+== How can I check it?
+
+To check the service you have two different options:
+
+    * Run the application and make some requests:
+         ** GET localhost:8090/v1/cars
+         ** POST localhost:8090/v1/cars:
+
+        {
+        "color": "Blue",
+        "model": "Mustang",
+        "brand": "FORD"
+        }
+
+        ** POST localhost:8090/v1/cars/create-bucket?bucketName=test
+
+    * Run the test folder that uses localstack containers
