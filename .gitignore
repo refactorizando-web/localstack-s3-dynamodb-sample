@@ -5,8 +5,6 @@ bin/
 .settings/
 .idea/
 *.iml
-/src/main/java/com/stratio/financial/onetradeoperations/infrastructure/rest/spring/dto/
-/src/main/java/com/stratio/financial/onetradeoperations/infrastructure/rest/spring/spec/
 .swagger-codegen/
 .openapi-generator/
 .openapi-generator-ignore
